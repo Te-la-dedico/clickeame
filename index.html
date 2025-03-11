@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Explosión de Partículas en Forma de Corazón</title>
   <style>
     html, body {
@@ -18,8 +18,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      padding: 15px 30px;
-      font-size: 18px;
+      padding: 10px 20px; /* Botón más pequeño */
+      font-size: 16px; /* Tamaño de fuente más pequeño */
       font-family: sans-serif;
       color: #fff;
       background-color: #3498db;
@@ -38,6 +38,14 @@
       top: 0;
       left: 0;
       pointer-events: none;
+    }
+
+    /* Ajustes para móviles */
+    @media (max-width: 600px) {
+      #explosion-button {
+        padding: 8px 16px; /* Botón aún más pequeño en móviles */
+        font-size: 14px; /* Fuente más pequeña en móviles */
+      }
     }
   </style>
 </head>
@@ -63,7 +71,7 @@
         this.y = y;
         this.vx = (Math.random() - 0.5) * 2;
         this.vy = (Math.random() - 0.5) * 2;
-        // Aumenta el tamaño de las partículas
+        // Tamaño de las partículas
         this.radius = Math.random() * 5 + 5; // Partículas más grandes
         this.life = 3000;
         this.elapsed = 0;
@@ -120,9 +128,10 @@
         const angle = (i / count) * Math.PI * 2 * progress;
         const heartX = 16 * Math.pow(Math.sin(angle), 3);
         const heartY = - (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
-        // Aumenta la escala del corazón
-        const particleX = x + heartX * 15; // Corazón más grande
-        const particleY = y + heartY * 15; // Corazón más grande
+        // Escala del corazón reducida para móviles
+        const scale = window.innerWidth <= 600 ? 8 : 15; // Escala más pequeña en móviles
+        const particleX = x + heartX * scale;
+        const particleY = y + heartY * scale;
         particles.push(new Particle(particleX, particleY));
       }
       lastTime = performance.now();
