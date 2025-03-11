@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explosión de Partículas en Forma de Corazón</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      background: #222;
+    }
+
+    #explosion-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 15px 30px;
+      font-size: 18px;
+      font-family: sans-serif;
+      color: #fff;
+      background-color: #3498db;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s ease-out;
+    }
+
+    #explosion-button.active {
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <button id="explosion-button">Dame varios clicks y verás lo que te pertenece de mí</button>
+  <canvas id="particle-canvas"></canvas>
+
+  <script>
+    const button = document.getElementById("explosion-button");
+    const canvas = document.getElementById("particle-canvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        // Aumenta el tamaño de las partículas
+        this.radius = Math.random() * 5 + 5; // Partículas más grandes
+        this.life = 3000;
+        this.elapsed = 0;
+      }
+      
+      update(dt) {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.98;
+        this.vy *= 0.98;
+        this.elapsed += dt;
+      }
+      
+      draw(ctx) {
+        const progress = this.elapsed / this.life;
+        const alpha = Math.max(1 - progress, 0);
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.globalAlpha = alpha;
+        // Color rojo
+        ctx.fillStyle = "rgba(255, 0, 0, 1)";
+        ctx.beginPath();
+        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    let particles = [];
+    let lastTime = 0;
+    let progress = 0;
+
+    function animate(time) {
+      const dt = time - lastTime;
+      lastTime = time;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      particles.forEach((p) => {
+        p.update(dt);
+        p.draw(ctx);
+      });
+      
+      particles = particles.filter((p) => p.elapsed < p.life);
+      
+      if (particles.length > 0) {
+        requestAnimationFrame(animate);
+      }
+    }
+
+    function createParticles(x, y, progress) {
+      const count = 100;
+      for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2 * progress;
+        const heartX = 16 * Math.pow(Math.sin(angle), 3);
+        const heartY = - (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle));
+        // Aumenta la escala del corazón
+        const particleX = x + heartX * 15; // Corazón más grande
+        const particleY = y + heartY * 15; // Corazón más grande
+        particles.push(new Particle(particleX, particleY));
+      }
+      lastTime = performance.now();
+      requestAnimationFrame(animate);
+    }
+
+    button.addEventListener("click", function (e) {
+      const rect = button.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      
+      button.classList.add("active");
+      setTimeout(() => {
+        button.classList.remove("active");
+      }, 200);
+      
+      progress += 0.2;
+      if (progress > 1) progress = 1;
+      createParticles(centerX, centerY, progress);
+    });
+  </script>
+</body>
+</html>
